@@ -1,6 +1,7 @@
 import { DatabaseSync } from 'node:sqlite';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { SEED_PRODUCTS } from './seedProducts.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const db = new DatabaseSync(path.join(__dirname, '../../data.db'));
@@ -54,48 +55,23 @@ if (codeCount === 0) {
   for (const c of seedCodes) insertCode.run(...c);
 }
 
+const BRAND_PRODUCTS = [
+  ['calvin klein', 'Calvin Klein', 'CK logo cotton t-shirt', 39.90, 5.95, 'https://calvinklein.com/example', null],
+  ['calvin klein', 'Amazon', 'Calvin Klein logo tee (same SKU)', 32.99, 0, 'https://amazon.com/example', null],
+  ['calvin klein', 'Zalando', 'Calvin Klein cotton t-shirt', 35.00, 0, 'https://zalando.com/example', null]
+];
+
+const ALL_SEED_PRODUCTS = [...SEED_PRODUCTS, ...BRAND_PRODUCTS];
+
 const productCount = db.prepare('SELECT COUNT(*) as c FROM products').get().c;
-if (productCount === 0) {
+// Re-seed if empty, or if it's still the old small seed (< 50 rows) from a previous version
+if (productCount < 50) {
+  db.exec('DELETE FROM products');
   const insertProduct = db.prepare(`
     INSERT INTO products (query_tag, retailer, title, price, shipping, url, image_url)
     VALUES (?, ?, ?, ?, ?, ?, ?)
   `);
-  const seedProducts = [
-    ['pink dress', 'Shein', 'Pink wrap midi dress', 18.99, 4.99, 'https://shein.com/example', null],
-    ['pink dress', 'Amazon', 'Floral pink wrap dress', 27.50, 0, 'https://amazon.com/example', null],
-    ['pink dress', 'Zalando', 'Pink belted midi dress', 39.99, 0, 'https://zalando.com/example', null],
-    ['pink dress', 'Temu', 'Pink V-neck wrap dress', 12.30, 3.50, 'https://temu.com/example', null],
-
-    ['blue dress', 'Shein', 'Blue floral summer dress', 16.50, 4.99, 'https://shein.com/example-blue-dress', null],
-    ['blue dress', 'Amazon', 'Navy blue A-line dress', 29.99, 0, 'https://amazon.com/example-blue-dress', null],
-    ['blue dress', 'Zalando', 'Blue maxi dress', 44.95, 0, 'https://zalando.com/example-blue-dress', null],
-    ['blue dress', 'Temu', 'Light blue slip dress', 13.80, 3.50, 'https://temu.com/example-blue-dress', null],
-
-    ['black dress', 'Shein', 'Black bodycon mini dress', 14.99, 4.99, 'https://shein.com/example-black-dress', null],
-    ['black dress', 'Amazon', 'Classic black midi dress', 32.00, 0, 'https://amazon.com/example-black-dress', null],
-    ['black dress', 'Zalando', 'Black tailored dress', 49.99, 0, 'https://zalando.com/example-black-dress', null],
-    ['black dress', 'Temu', 'Black ribbed slip dress', 11.20, 3.50, 'https://temu.com/example-black-dress', null],
-
-    ['white sneakers', 'Amazon', 'Classic white leather sneakers', 45.00, 0, 'https://amazon.com/example-white-sneakers', null],
-    ['white sneakers', 'Shein', 'White low-top sneakers', 22.99, 4.99, 'https://shein.com/example-white-sneakers', null],
-    ['white sneakers', 'Zalando', 'White canvas sneakers', 39.95, 0, 'https://zalando.com/example-white-sneakers', null],
-    ['white sneakers', 'Temu', 'White platform sneakers', 18.40, 3.50, 'https://temu.com/example-white-sneakers', null],
-
-    ['denim jacket', 'Amazon', 'Classic blue denim jacket', 38.00, 0, 'https://amazon.com/example-denim-jacket', null],
-    ['denim jacket', 'Shein', 'Oversized denim jacket', 24.99, 4.99, 'https://shein.com/example-denim-jacket', null],
-    ['denim jacket', 'Zalando', 'Cropped denim jacket', 54.95, 0, 'https://zalando.com/example-denim-jacket', null],
-    ['denim jacket', 'Temu', 'Light wash denim jacket', 19.99, 3.50, 'https://temu.com/example-denim-jacket', null],
-
-    ['black hoodie', 'Amazon', 'Plain black pullover hoodie', 25.99, 0, 'https://amazon.com/example-black-hoodie', null],
-    ['black hoodie', 'Shein', 'Oversized black hoodie', 15.50, 4.99, 'https://shein.com/example-black-hoodie', null],
-    ['black hoodie', 'Zalando', 'Cotton fleece hoodie', 34.95, 0, 'https://zalando.com/example-black-hoodie', null],
-    ['black hoodie', 'Temu', 'Fleece-lined black hoodie', 12.90, 3.50, 'https://temu.com/example-black-hoodie', null],
-
-    ['calvin klein', 'Calvin Klein', 'CK logo cotton t-shirt', 39.90, 5.95, 'https://calvinklein.com/example', null],
-    ['calvin klein', 'Amazon', 'Calvin Klein logo tee (same SKU)', 32.99, 0, 'https://amazon.com/example', null],
-    ['calvin klein', 'Zalando', 'Calvin Klein cotton t-shirt', 35.00, 0, 'https://zalando.com/example', null]
-  ];
-  for (const p of seedProducts) insertProduct.run(...p);
+  for (const p of ALL_SEED_PRODUCTS) insertProduct.run(...p);
 }
 
 export default db;

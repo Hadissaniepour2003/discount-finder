@@ -1,5 +1,6 @@
 import express from 'express';
 import db from '../db/index.js';
+import { matchColorAndItem, generateDynamicProducts } from '../db/seedProducts.js';
 
 const router = express.Router();
 
@@ -46,25 +47,21 @@ function applyBestCode(product) {
 
 // Naive keyword bucket matcher for MVP. Real version would use
 // a search index / embeddings against live retailer data.
-// Scores each known tag by how many of its words appear in the query,
-// and only returns a match if at least one word overlaps.
+// Only matches a tag if ALL of its words appear in the query
+// (e.g. tag "blue dress" matches query "blue dress" or "blue dress for summer",
+// but not "orange dress" — avoids partial matches on a shared word like "dress").
 function matchQueryTag(query) {
   const qWords = query.toLowerCase().split(/\s+/).filter(Boolean);
   const tags = db.prepare('SELECT DISTINCT query_tag FROM products').all().map(r => r.query_tag);
 
-  let bestTag = null;
-  let bestScore = 0;
-
   for (const tag of tags) {
     const tagWords = tag.split(' ');
-    const overlap = tagWords.filter(w => qWords.includes(w)).length;
-    if (overlap > bestScore) {
-      bestScore = overlap;
-      bestTag = tag;
+    if (tagWords.every(w => qWords.includes(w))) {
+      return tag;
     }
   }
 
-  return bestScore > 0 ? bestTag : null;
+  return null;
 }
 
 // GET /api/search?q=pink+dress
@@ -73,12 +70,26 @@ router.get('/', (req, res) => {
   if (!q) return res.status(400).json({ error: 'query param "q" is required' });
 
   const tag = matchQueryTag(q);
-  if (!tag) return res.json({ query: q, matched_tag: null, results: [] });
 
-  const products = db.prepare('SELECT * FROM products WHERE query_tag = ?').all(tag);
-  const withPricing = products.map(applyBestCode).sort((a, b) => a.final_price - b.final_price);
+  if (tag) {
+    const products = db.prepare('SELECT * FROM products WHERE query_tag = ?').all(tag);
+    const withPricing = products.map(applyBestCode).sort((a, b) => a.final_price - b.final_price);
+    return res.json({ query: q, matched_tag: tag, results: withPricing, source: 'seed' });
+  }
 
-  res.json({ query: q, matched_tag: tag, results: withPricing });
+  // No curated match — try the dynamic generator for any recognized
+  // color + item combination (covers extra colors/items not in the seed).
+  const dynamicMatch = matchColorAndItem(q);
+  if (dynamicMatch) {
+    const generated = generateDynamicProducts(dynamicMatch.color, dynamicMatch.itemDef).map((p, i) => ({
+      id: `gen-${dynamicMatch.color}-${dynamicMatch.itemDef.item}-${i}`,
+      ...p
+    }));
+    const withPricing = generated.map(applyBestCode).sort((a, b) => a.final_price - b.final_price);
+    return res.json({ query: q, matched_tag: `${dynamicMatch.color} ${dynamicMatch.itemDef.item}`, results: withPricing, source: 'generated' });
+  }
+
+  res.json({ query: q, matched_tag: null, results: [], source: 'none' });
 });
 
 export default router;

@@ -84,8 +84,8 @@ export default function SearchPanel() {
 
       {!loading && searched && results.length === 0 && !error && (
         <p className="section-label">
-          No matches for "{query}" yet. This MVP only recognizes a few categories — try "pink dress", "blue dress",
-          "black dress", "white sneakers", "denim jacket", "black hoodie", or "calvin klein".
+          No matches for "{query}" yet. Try a "&lt;color&gt; &lt;item&gt;" search — e.g. "red sweater", "navy boots",
+          "olive jacket", "white sneakers" — or "calvin klein".
         </p>
       )}
 
