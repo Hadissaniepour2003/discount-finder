@@ -1,6 +1,6 @@
 # Discount Finder (MVP)
 
-A price comparison + crowdsourced discount code app. This is a working local
+A price comparison + crowdsourced discount code app. This is a working
 prototype with two halves:
 
 - **Backend** (`/backend`) — Node/Express API with a local SQLite database
@@ -8,12 +8,27 @@ prototype with two halves:
 - **Frontend** (`/frontend`) — React app (Vite) with two tabs: price
   comparison search and the discount code feed (trending, submit, vote).
 
+**Live demo:**
+- App: https://discount-finder-frontend-grzodcyr2-hadis-saniepour-s-projects.vercel.app/
+- Backend API: https://discount-finder.onrender.com
+
+The backend free tier sleeps when idle — the first request after a period of
+inactivity may take 30-60 seconds to respond.
+
 ## What's real vs. mocked
 
-- **Price comparison** uses a small seeded set of mock products (a "pink
-  dress" and a "Calvin Klein t-shirt" each available from several retailers).
-  Searching matches against these by simple keyword — real retailer data
-  (Amazon API, scraping, etc.) would replace this layer.
+- **Price comparison** uses a generated catalog of mock products covering
+  10 colors × 10 clothing items (~330 listings across Shein, Amazon,
+  Zalando, and Temu), plus a small "Calvin Klein" brand example. Search
+  matches on exact "`<color> <item>`" combinations (e.g. "blue dress",
+  "olive jacket").
+  - For combinations outside the curated catalog (extra colors like navy,
+    orange, olive, or extra items like scarf, boots, bag), results are
+    generated on the fly deterministically — same search always returns the
+    same fake prices, without needing every combination pre-seeded.
+  - This is all mock data with placeholder URLs. Real retailer data (Amazon
+    Product Advertising API, etc.) would replace this layer — see
+    `backend/src/db/seedProducts.js` for where it plugs in.
 - **Discount codes** are fully functional: submit a code, vote it up/down,
   and the trending list + price comparison automatically use the
   highest-success-rate active code for each retailer (60%+ success rate
@@ -45,12 +60,25 @@ npm install
 npm run dev
 ```
 
-Runs on `http://localhost:5173` and proxies `/api/*` requests to the backend.
+Runs on `http://localhost:5173` and proxies `/api/*` requests to the backend
+during local development. In production (Vercel), `frontend/src/api.js`
+points at the deployed backend URL directly (configurable via the
+`VITE_API_URL` environment variable).
+
+## Deployment notes
+
+- **Backend (Render)**: free Web Service, root directory `backend`, build
+  command `npm install`, start command `npm start`. Free tier has an
+  ephemeral filesystem, so `data.db` resets to seed data on redeploy — fine
+  for a demo, not for persisting real user submissions.
+- **Frontend (Vercel)**: free project, root directory `frontend`, framework
+  preset Vite (auto-detected).
 
 ## API endpoints
 
-- `GET /api/search?q=pink+dress` — price comparison results, sorted by final
-  price after best applicable code
+- `GET /api/search?q=blue+dress` — price comparison results, sorted by final
+  price after best applicable code. Response includes `source`: `"seed"`
+  (curated catalog), `"generated"` (dynamic fallback), or `"none"` (no match).
 - `GET /api/codes` — all submitted codes
 - `GET /api/codes/trending` — top codes by success rate
 - `GET /api/codes/retailer/:retailer` — active codes for one retailer
@@ -70,3 +98,4 @@ Runs on `http://localhost:5173` and proxies `/api/*` requests to the backend.
 4. Add scheduled jobs to re-verify codes periodically and expire stale ones.
 5. Consider a browser extension that reads the current product page and
    surfaces comparisons + codes automatically.
+
