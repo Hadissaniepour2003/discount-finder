@@ -5,6 +5,7 @@ export default function SearchPanel() {
   const [query, setQuery] = useState('pink dress');
   const [results, setResults] = useState([]);
   const [matchedTag, setMatchedTag] = useState(null);
+  const [searched, setSearched] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -16,6 +17,7 @@ export default function SearchPanel() {
       const data = await api.search(query);
       setResults(data.results);
       setMatchedTag(data.matched_tag);
+      setSearched(true);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -80,8 +82,15 @@ export default function SearchPanel() {
         </a>
       ))}
 
-      {!loading && results.length === 0 && !error && (
-        <p className="section-label">No results yet. Try searching for "pink dress" or "calvin klein".</p>
+      {!loading && searched && results.length === 0 && !error && (
+        <p className="section-label">
+          No matches for "{query}" yet. This MVP only recognizes a few categories — try "pink dress", "blue dress",
+          "black dress", "white sneakers", "denim jacket", "black hoodie", or "calvin klein".
+        </p>
+      )}
+
+      {!loading && !searched && results.length === 0 && !error && (
+        <p className="section-label">Try searching for "pink dress", "white sneakers", or "calvin klein".</p>
       )}
     </div>
   );
