@@ -1,0 +1,245 @@
+:root {
+  --bg: #faf9f6;
+  --surface: #ffffff;
+  --border: #e3e1da;
+  --text: #1f1f1d;
+  --text-secondary: #6b6a64;
+  --accent: #185fa5;
+  --accent-bg: #e6f1fb;
+  --success: #0f6e56;
+  --success-bg: #e1f5ee;
+  --danger: #993c1d;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+#root {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+h1 {
+  font-size: 22px;
+  font-weight: 500;
+  margin: 0 0 4px;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin: 0 0 24px;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.tab {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+
+.tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+input, select, button, textarea {
+  font-family: inherit;
+  font-size: 14px;
+}
+
+input, select, textarea {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+button {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 8px 16px;
+  cursor: pointer;
+  color: var(--text);
+}
+
+button:hover {
+  background: #f3f2ee;
+}
+
+button.primary {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+button.primary:hover {
+  background: #0c447c;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+}
+
+.card.cheapest {
+  border: 2px solid var(--accent);
+}
+
+.result-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.result-link:hover {
+  border-color: var(--accent);
+  background: #f7fafd;
+}
+
+.go-arrow {
+  font-size: 18px;
+  color: var(--text-secondary);
+}
+
+.result-link:hover .go-arrow {
+  color: var(--accent);
+}
+
+.card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--accent-bg);
+  color: var(--accent);
+  margin-right: 8px;
+}
+
+.price {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 0;
+  text-align: right;
+}
+
+.price-sub {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0;
+  text-align: right;
+}
+
+.code-applied {
+  font-size: 12px;
+  color: var(--success);
+  margin-top: 4px;
+}
+
+code {
+  font-size: 12px;
+  background: #f3f2ee;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.section-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+}
+
+.trending-box {
+  background: #f3f2ee;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 20px;
+}
+
+.submit-box {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 20px;
+}
+
+.submit-box .row {
+  margin-bottom: 8px;
+}
+
+.submit-box input, .submit-box select {
+  flex: 1;
+  min-width: 100px;
+}
+
+.code-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.vote-btn {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.success-rate {
+  font-size: 12px;
+  color: var(--success);
+  font-weight: 500;
+}
+
+.error {
+  color: var(--danger);
+  font-size: 13px;
+}
+
+textarea {
+  width: 100%;
+  min-height: 60px;
+  resize: vertical;
+}
