@@ -1,6 +1,7 @@
 import { DatabaseSync } from 'node:sqlite';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { SEED_PRODUCTS } from './seedProducts.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const db = new DatabaseSync(path.join(__dirname, '../../data.db'));
@@ -54,22 +55,23 @@ if (codeCount === 0) {
   for (const c of seedCodes) insertCode.run(...c);
 }
 
-const productCount = db.prepare('SELECT COUNT(*) as c FROM products').get().c;
-if (productCount === 0) {
-  const insertProduct = db.prepare(`
-    INSERT INTO products (query_tag, retailer, title, price, shipping, url, image_url)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `);
-  const seedProducts = [
-    ['pink dress', 'Shein', 'Pink wrap midi dress', 18.99, 4.99, 'https://shein.com/example', null],
-    ['pink dress', 'Amazon', 'Floral pink wrap dress', 27.50, 0, 'https://amazon.com/example', null],
-    ['pink dress', 'Zalando', 'Pink belted midi dress', 39.99, 0, 'https://zalando.com/example', null],
-    ['pink dress', 'Temu', 'Pink V-neck wrap dress', 12.30, 3.50, 'https://temu.com/example', null],
-    ['calvin klein', 'Calvin Klein', 'CK logo cotton t-shirt', 39.90, 5.95, 'https://calvinklein.com/example', null],
-    ['calvin klein', 'Amazon', 'Calvin Klein logo tee (same SKU)', 32.99, 0, 'https://amazon.com/example', null],
-    ['calvin klein', 'Zalando', 'Calvin Klein cotton t-shirt', 35.00, 0, 'https://zalando.com/example', null]
-  ];
-  for (const p of seedProducts) insertProduct.run(...p);
-}
+const BRAND_PRODUCTS = [
+  ['calvin klein', 'Calvin Klein', 'CK logo cotton t-shirt', 39.90, 5.95, 'https://calvinklein.com/example', null],
+  ['calvin klein', 'Amazon', 'Calvin Klein logo tee (same SKU)', 32.99, 0, 'https://amazon.com/example', null],
+  ['calvin klein', 'Zalando', 'Calvin Klein cotton t-shirt', 35.00, 0, 'https://zalando.com/example', null]
+];
+
+const ALL_SEED_PRODUCTS = [...SEED_PRODUCTS, ...BRAND_PRODUCTS];
+
+// Always wipe and reseed the products table on startup. This is demo/seed
+// data only (no real user-submitted products), so we always want it to
+// reflect the current seedProducts.js catalog rather than whatever was
+// persisted from a previous deploy.
+db.exec('DELETE FROM products');
+const insertProduct = db.prepare(`
+  INSERT INTO products (query_tag, retailer, title, price, shipping, url, image_url)
+  VALUES (?, ?, ?, ?, ?, ?, ?)
+`);
+for (const p of ALL_SEED_PRODUCTS) insertProduct.run(...p);
 
 export default db;
